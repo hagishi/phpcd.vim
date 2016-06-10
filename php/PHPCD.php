@@ -330,8 +330,10 @@ class PHPCD extends RpcServer
             }
 
             if ($type) {
-                if ($type[0] != '\\') {
-                    $type = '\\' . $type;
+				if ($type[0] == '\\') {
+					$type = substr($type, 1);
+				} else if ($type[0] != '\\') {
+					$type = '\\' . $type;
                 }
                 $types[] = $type;
             }
