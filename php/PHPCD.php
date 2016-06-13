@@ -395,6 +395,34 @@ class PHPCD extends RpcServer
                 }
             }
 
+            $doc = $reflection->getDocComment();
+
+            if ($doc) {
+                $doclist = explode("\n", $doc);
+                foreach ($doclist as $r) {
+                    $has_doc = preg_match('/@(property|method)\s+(\S+)\s+(.*)/m', $r, $matches);
+                    if ($has_doc) {
+                        $kind = 'p';
+                        if ($matches[1] == 'method') {
+                            $kind = 'f';
+                            $info = $matches[3];
+                            $name = explode('(', $info)[0];
+                        } else {
+                            $info = $matches[3];
+                            $info = $name = str_replace('$', '', $info);
+                        }
+                        $items[] = [
+                            'word'  => $info,
+                            'abbr' => sprintf("%3s %s", '+', $info),
+                            'info'  => '',
+                            'kind'  => $kind,
+                            'icase' => 1,
+                        ];
+                    }
+                }
+            }
+
+
             return $items;
         } catch (\ReflectionException $e) {
             $this->logger->debug($e->getMessage());
