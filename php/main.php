@@ -9,6 +9,12 @@ require __DIR__ . '/../vendor/autoload.php';
 /** load autoloader for the project **/
 require $root . '/vendor/autoload.php';
 
+if (is_file($root . '/artisan')) {
+	$target = __DIR__ . '/../src/*.php';
+	foreach(glob($target) as $path) {
+		include $path;
+	}
+}
 $log_path = getenv('HOME') . '/.phpcd.log';
 $logger = new PHPCD\Logger($log_path);
 
