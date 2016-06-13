@@ -1,6 +1,7 @@
 <?php
 
-class DB extends \Illuminate\Support\Facades\DB{
+class DB extends \Illuminate\Support\Facades\DB
+{
 
     /**
      * Get a database connection instance.

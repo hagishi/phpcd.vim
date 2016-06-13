@@ -1,6 +1,7 @@
 <?php
 
-class Eloquent extends \Illuminate\Database\Eloquent\Model{
+class Eloquent extends \Illuminate\Database\Eloquent\Model
+{
 
     /**
      * Register a new global scope.

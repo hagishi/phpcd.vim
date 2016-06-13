@@ -1,6 +1,7 @@
 <?php
 
-class Event extends \Illuminate\Support\Facades\Event{
+class Event extends \Illuminate\Support\Facades\Event
+{
 
     /**
      * Register an event listener with the dispatcher.
