@@ -14,7 +14,13 @@ if (is_file($root . '/artisan')) {
 	foreach(glob($target) as $path) {
 		include $path;
 	}
+
+	$target = $root . '/tests/*Test.php';
+	foreach(glob($target) as $path) {
+		include $path;
+	}
 }
+
 $log_path = getenv('HOME') . '/.phpcd.log';
 $logger = new PHPCD\Logger($log_path);
 
