@@ -56,6 +56,7 @@ function! phpcd#CompletePHP(findstart, base) " {{{
 
 		if context =~? '^use\s' || context ==? 'use' " {{{
 			" TODO complete use
+			return rpcrequest(g:phpcd_channel_id, 'classMap', expand('%:p'))
 		endif " }}}
 
 		if context =~ '\(->\|::\)$' " {{{

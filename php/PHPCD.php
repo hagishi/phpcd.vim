@@ -585,6 +585,20 @@ class PHPCD extends RpcServer
         return preg_replace('#\s*\/|/\s*#','', $doc);
     }
 
+
+	/**
+	 * @return array
+	 */
+    public function classMap($path)
+    {
+        $composer = $this->root . '/composer.json';
+	    if (is_file($composer)) {
+            $classMap = require $this->root . '/vendor/composer/autoload_classmap.php';
+		    return array_keys($classMap);
+        }
+        return [];
+    }
+
     /**
      * generate psr4 namespace according composer.json and file path
      */
