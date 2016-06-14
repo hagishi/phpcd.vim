@@ -81,9 +81,13 @@ class PHPCD extends RpcServer
      */
     public function info($class_name, $pattern, $static_mode = 'both', $public_only)
     {
+        $data = [];
         if ($class_name) {
             $static_mode = $this->translateStaticMode($static_mode);
-            return $this->classInfo($class_name, $pattern, $static_mode, $public_only);
+	        foreach (explode('|', $class_name) as $klass) {
+                $data = array_merge($data, $this->classInfo($klass, $pattern, $static_mode, $public_only));
+            }
+            return $data;
         }
 
         if ($pattern) {
@@ -179,6 +183,19 @@ class PHPCD extends RpcServer
                 : $reflection->getFileName();
             $doc = $reflection->getDocComment();
 
+            if (!$doc) {
+            	$parent = $reflection_class->getParentClass();
+                if ($parent) {
+                    if ($parent->hasProperty($name)) {
+                        $parent = $parent->getProperty($name);
+                    } else {
+                        $parent = $parent->getMethod($name);
+                    }
+                    $doc = $parent->getDocComment();
+                }
+            }
+
+
             return [$path, $this->clearDoc($doc)];
         } catch (\ReflectionException $e) {
             $this->logger->debug((string) $e);
@@ -272,12 +289,12 @@ class PHPCD extends RpcServer
      */
     public function functype($class_name, $name)
     {
-        if (version_compare(PHP_VERSION, '7.0.0') >= 0) {
-            $type = $this->typeByReturnType($class_name, $name);
-            if ($type) {
-                return [$type];
-            }
-        }
+//        if (version_compare(PHP_VERSION, '7.0.0') >= 0) {
+//            $type = $this->typeByReturnType($class_name, $name);
+//            if ($type) {
+//                return [$type];
+//            }
+//        }
 
         return $this->typeByDoc($class_name, $name);
     }
@@ -287,7 +304,12 @@ class PHPCD extends RpcServer
         try {
             if ($class_name) {
                 $reflection = new \ReflectionClass($class_name);
-                $reflection = $reflection->getMethod($name);
+
+                if ($reflection->hasMethod($name)) {
+                    $reflection = $reflection->getMethod($name);
+                } else {
+                    $reflection = $reflection->getProperty($name);
+                }
             } else {
                 $reflection = new \ReflectionFunction($name);
             }
@@ -303,6 +325,9 @@ class PHPCD extends RpcServer
         list($path, $doc) = $this->doc($class_name, $name);
         $has_doc = preg_match('/@(return|var)\s+(\S+)/m', $doc, $matches);
         if (!$has_doc) {
+        	if (explode('|', $class_name)) {
+        		return [$class_name];
+            }
             return [];
         }
 
@@ -339,6 +364,9 @@ class PHPCD extends RpcServer
             }
         }
 
+         if (count($types)) {
+             return [join('|', $types)];
+         }
         return $types;
     }
 
