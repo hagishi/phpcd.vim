@@ -16,7 +16,9 @@ class ReflectionClass extends \ReflectionClass
     {
         $methods = $this->getMethods();
 
-        $static = $this->isAbstract();
+		if ($this->isAbstract()) {
+			$static = null;
+		}
 
         foreach ($methods as $key => $method) {
             if (false === $this->filter($method, $static, $public_only)) {

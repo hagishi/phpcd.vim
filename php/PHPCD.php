@@ -186,6 +186,7 @@ class PHPCD extends RpcServer
         try {
             $reflection_class = null;
             if ($class_name) {
+            	$class_name = explode('|', $class_name)[0];
                 $reflection = new \ReflectionClass($class_name);
                 if ($reflection->hasProperty($name)) {
                     $reflection_class = $reflection;
@@ -460,7 +461,7 @@ class PHPCD extends RpcServer
                             $info = $name = str_replace('$', '', $info);
                         }
                         $items[] = [
-                            'word'  => $info,
+                            'word'  => $name,
                             'abbr' => sprintf("%3s %s", '+', $info),
                             'info'  => '',
                             'kind'  => $kind,
