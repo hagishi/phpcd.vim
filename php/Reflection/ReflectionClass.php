@@ -16,6 +16,8 @@ class ReflectionClass extends \ReflectionClass
     {
         $methods = $this->getMethods();
 
+        $static = $this->isAbstract();
+
         foreach ($methods as $key => $method) {
             if (false === $this->filter($method, $static, $public_only)) {
                 unset($methods[$key]);

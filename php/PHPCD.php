@@ -84,7 +84,10 @@ class PHPCD extends RpcServer
         $data = [];
         if ($class_name) {
             $static_mode = $this->translateStaticMode($static_mode);
-	        foreach (explode('|', $class_name) as $klass) {
+
+	        $names = $this->getParentClass($class_name);
+
+	        foreach ($names as $klass) {
                 $data = array_merge($data, $this->classInfo($klass, $pattern, $static_mode, $public_only));
             }
             return $data;
@@ -95,6 +98,23 @@ class PHPCD extends RpcServer
         }
 
         return [];
+    }
+
+
+    private function getParentClass($class_name)
+    {
+    	$names = [$class_name];
+        foreach(explode('|', $class_name) as $klass) {
+            $names[] = $klass;
+            $ref = new \ReflectionClass($klass);
+
+            if ($ref) {
+                while ($ref = $ref->getParentClass()) {
+                    $names[] = $ref->getName();
+                }
+            }
+        }
+        return $names;
     }
 
     /**
