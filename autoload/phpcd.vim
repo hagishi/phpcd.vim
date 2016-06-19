@@ -52,14 +52,19 @@ function! phpcd#CompletePHP(findstart, base) " {{{
 			return [expand('%:t:r')]
 		end
 
-		let [current_namespace, imports] = phpcd#GetCurrentNameSpace()
+		let [current_namespace, imports, class] = phpcd#GetCurrentNameSpace()
+
 
 		if context =~? '^use\s' || context ==? 'use' " {{{
 			" TODO complete use
-			return rpcrequest(g:phpcd_channel_id, 'classMap', expand('%:p'))
+			return rpcrequest(g:phpcd_channel_id, 'classMap', context, a:base)
 		endif " }}}
 
+
 		if context =~ '\(->\|::\)$' " {{{
+			" remove return
+			" let context = substitute(context, 'return ', '', 'g')
+
 			let classname = phpcd#GetClassName(line('.'), context, current_namespace, imports)
 
 			" TODO Fix it for variables with reference to $this etc.
@@ -86,7 +91,10 @@ function! phpcd#CompletePHP(findstart, base) " {{{
 			" special case when you've typed the class keyword and the name too,
 			" only extends and implements allowed there
 			return filter(['extends', 'implements'], 'stridx(v:val, a:base) == 0')
+		elseif context =~? '\(public\|protected\|private\)'
+			return rpcrequest(g:phpcd_channel_id, 'getAttr', current_namespace . '\' . class, context, a:base)
 		elseif context =~? 'new'
+			return rpcrequest(g:phpcd_channel_id, 'getClass', expand('%:p'))
 			" TODO complete $foo = new
 		endif " }}}
 
@@ -1082,7 +1090,7 @@ function! phpcd#GetCurrentNameSpace() " {{{
 		endfor
 	endif
 
-	return [nsuse.namespace, imports]
+	return [nsuse.namespace, imports, nsuse.class]
 endfunction " }}}
 
 function! phpcd#GetCurrentFunctionBoundaries() " {{{

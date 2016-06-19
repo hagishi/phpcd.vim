@@ -617,15 +617,99 @@ class PHPCD extends RpcServer
 	/**
 	 * @return array
 	 */
-    public function classMap($path)
+    public function classMap($context, $base = '')
     {
+		$arr      = [];
+        if ($base) {
+            $context = $base;
+        } else {
+            $context  = preg_replace('/^use\s?/', '', $context);
+        }
         $composer = $this->root . '/composer.json';
 	    if (is_file($composer)) {
             $classMap = require $this->root . '/vendor/composer/autoload_classmap.php';
-		    return array_keys($classMap);
+
+			foreach(array_keys($classMap) as $name) {
+				if (preg_match("/". preg_quote($context, '\\') ."/i", $name)) {
+					$arr[] = [
+					    'word' => str_replace($context, '', $name),
+                        'abbr' => $name,
+                        'kind' => 'pc',
+                        'icase' => 1,
+                    ];
+				}
+			}
         }
-        return [];
+
+        foreach (get_declared_classes() as $name) {
+            if (preg_match("/". preg_quote($context, '\\') ."/i", $name)) {
+                $arr[] = [
+                    'word' => str_replace($context, '', $name),
+                    'abbr' => $name,
+                    'kind' => 'bc',
+                    'icase' => 1,
+                ];
+            }
+        }
+
+        foreach (get_declared_traits() as $name) {
+            if (preg_match("/". preg_quote($context, '\\') ."/i", $name)) {
+                $arr[] = [
+                    'word' => str_replace($context, '', $name),
+                    'abbr' => $name,
+                    'kind' => 'tr',
+                    'icase' => 1,
+                ];
+            }
+        }
+
+        foreach (get_declared_interfaces() as $name) {
+            if (preg_match("/". preg_quote($context, '\\') ."/i", $name)) {
+                $arr[] = [
+                    'word' => str_replace($context, '', $name),
+                    'abbr' => $name,
+                    'kind' => 'if',
+                    'icase' => 1,
+                ];
+            }
+        }
+
+
+		return $arr;
     }
+
+
+    public function getAttr($class_name, $context = '', $base = '')
+    {
+        $arr = [];
+        $ref = new \ReflectionClass($class_name);
+        foreach ($ref->getProperties() as $prop) {
+            if (!$prop->isPrivate()) {
+                $name = $prop->name;
+                $base = str_replace('$', '', $base);
+                if (preg_match("/$base/i", $name)) {
+                    $arr[] = [
+                        'word' => $name,
+                        'abbr' => '$' . $name,
+                    ];
+                }
+            }
+        }
+        return $arr;
+    }
+
+
+	public function getClass($path)
+	{
+		$classes = get_declared_classes();
+        $composer = $this->root . '/composer.json';
+	    if (is_file($composer)) {
+            $classMap = require $this->root . '/vendor/composer/autoload_classmap.php';
+			$classes = array_merge(array_keys($classMap), $classes);
+			return $classes;
+        }
+        return $classes;
+	}
 
     /**
      * generate psr4 namespace according composer.json and file path
