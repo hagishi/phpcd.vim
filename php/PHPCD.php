@@ -449,7 +449,7 @@ class PHPCD extends RpcServer
             if ($doc) {
                 $doclist = explode("\n", $doc);
                 foreach ($doclist as $r) {
-                    $has_doc = preg_match('/@(property|method)\s+(\S+)\s+(.*)/m', $r, $matches);
+                    $has_doc = preg_match('/@(property|method|property-read)\s+(\S+)\s+(.*)/m', $r, $matches);
                     if ($has_doc) {
                         $kind = 'p';
                         if ($matches[1] == 'method') {
@@ -458,7 +458,8 @@ class PHPCD extends RpcServer
                             $name = explode('(', $info)[0];
                         } else {
                             $info = $matches[3];
-                            $info = $name = str_replace('$', '', $info);
+                            $infov = preg_split("/\s/i", $info);
+                            $info = $name = str_replace('$', '', $infov[0]);
                         }
                         $items[] = [
                             'word'  => $name,
@@ -655,7 +656,7 @@ class PHPCD extends RpcServer
 					$arr[] = [
 					    'word' => str_replace($context, '', $name),
                         'abbr' => $name,
-                        'kind' => 'pc',
+                        'kind' => 'c',
                         'icase' => 1,
                     ];
 				}
@@ -667,7 +668,7 @@ class PHPCD extends RpcServer
                 $arr[] = [
                     'word' => str_replace($context, '', $name),
                     'abbr' => $name,
-                    'kind' => 'bc',
+                    'kind' => 'c',
                     'icase' => 1,
                 ];
             }
@@ -678,7 +679,7 @@ class PHPCD extends RpcServer
                 $arr[] = [
                     'word' => str_replace($context, '', $name),
                     'abbr' => $name,
-                    'kind' => 'tr',
+                    'kind' => 't',
                     'icase' => 1,
                 ];
             }
@@ -689,7 +690,7 @@ class PHPCD extends RpcServer
                 $arr[] = [
                     'word' => str_replace($context, '', $name),
                     'abbr' => $name,
-                    'kind' => 'if',
+                    'kind' => 'i',
                     'icase' => 1,
                 ];
             }

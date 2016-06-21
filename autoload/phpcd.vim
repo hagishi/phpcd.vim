@@ -60,10 +60,14 @@ function! phpcd#CompletePHP(findstart, base) " {{{
 			return rpcrequest(g:phpcd_channel_id, 'classMap', context, a:base)
 		endif " }}}
 
+		if getline('.') =~? '@var' "{{{
+			return rpcrequest(g:phpcd_channel_id, 'classMap', context, a:base)
+		endif " }}}
+
 
 		if context =~ '\(->\|::\)$' " {{{
 			" remove return
-			" let context = substitute(context, 'return ', '', 'g')
+			let context = substitute(context, 'return ', '', 'g')
 
 			let classname = phpcd#GetClassName(line('.'), context, current_namespace, imports)
 
@@ -189,7 +193,7 @@ function! phpcd#GetCurrentSymbolWithContext() " {{{
 	let context = substitute(current_instruction, '\s*[$a-zA-Z_0-9\\\x7f-\xff]*$', '', '')
 	let context = substitute(context, '\s\+\([\-:]\)', '\1', '')
 
-	let [current_namespace, current_imports] = phpcd#GetCurrentNameSpace()
+	let [current_namespace, current_imports, class] = phpcd#GetCurrentNameSpace()
 	if word != ''
 		let [symbol, symbol_namespace] = phpcd#ExpandClassName(word, current_namespace, current_imports)
 	else
